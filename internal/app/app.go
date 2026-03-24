@@ -23,7 +23,7 @@ func New(cfg Config) *App {
 	return &App{cfg: cfg}
 }
 
-func (a *App) Run() error {
+func (a *App) Run(ctx context.Context) error {
 	db, err := postgres.Open(context.Background(), a.cfg.DatabaseURL)
 	if err != nil {
 		return err
@@ -48,7 +48,8 @@ func (a *App) Run() error {
 	)
 	log.Printf("notify-service database config: dsn=%s", a.cfg.DatabaseURL)
 
-	return runtime.ServeGRPC(
+	return runtime.ServeGRPCWithContext(
+		ctx,
 		a.cfg.GRPCAddr,
 		func(server *grpc.Server) {
 			notifypb.RegisterNotifyServiceServer(server, h)
