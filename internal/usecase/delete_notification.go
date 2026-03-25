@@ -16,7 +16,7 @@ func NewDeleteNotification(repo d.NotifyRepo) *DeleteNotification {
 
 func (uc *DeleteNotification) Exec(ctx context.Context, userID d.UserID, notificationID d.NotificationID) error {
 	if userID == 0 || notificationID == "" {
-		return ErrValidation
+		return d.ErrValidation
 	}
 
 	n, found, err := uc.repo.Get(ctx, notificationID)
@@ -24,7 +24,7 @@ func (uc *DeleteNotification) Exec(ctx context.Context, userID d.UserID, notific
 		return err
 	}
 	if !found || n.UserID != userID {
-		return ErrNotFound
+		return d.ErrNotFound
 	}
 
 	deleted, err := uc.repo.Delete(ctx, notificationID, userID)
@@ -32,7 +32,7 @@ func (uc *DeleteNotification) Exec(ctx context.Context, userID d.UserID, notific
 		return err
 	}
 	if !deleted {
-		return ErrNotFound
+		return d.ErrNotFound
 	}
 
 	return nil

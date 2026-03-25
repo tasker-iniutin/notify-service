@@ -49,11 +49,12 @@ func (s *Server) CreateNotification(ctx context.Context, req *notifypb.CreateNot
 	}
 
 	created, err := s.create.Exec(ctx, d.NotificationCreateRequest{
-		UserID: userID,
-		TaskID: taskID,
-		Type:   nt,
-		Title:  req.GetTitle(),
-		Body:   req.GetBody(),
+		UserID:         userID,
+		TaskID:         taskID,
+		Type:           nt,
+		Title:          req.GetTitle(),
+		Body:           req.GetBody(),
+		IdempotencyKey: req.GetIdempotencyKey(),
 	})
 	if err != nil {
 		return nil, mapErr(err)
@@ -189,11 +190,11 @@ func requireUser(ctx context.Context, raw string) (d.UserID, error) {
 
 func mapErr(err error) error {
 	switch {
-	case errors.Is(err, uc.ErrValidation):
+	case errors.Is(err, d.ErrValidation):
 		return status.Error(codes.InvalidArgument, err.Error())
-	case errors.Is(err, uc.ErrBadPagination):
+	case errors.Is(err, d.ErrBadPagination):
 		return status.Error(codes.InvalidArgument, err.Error())
-	case errors.Is(err, uc.ErrNotFound):
+	case errors.Is(err, d.ErrNotFound):
 		return status.Error(codes.NotFound, err.Error())
 	default:
 		return status.Error(codes.Internal, err.Error())

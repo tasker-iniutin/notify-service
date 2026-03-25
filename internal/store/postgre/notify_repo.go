@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	d "github.com/tasker-iniutin/notify-service/internal/domain"
@@ -20,9 +21,17 @@ func NewNotifyPostgreRepo(db *pgxpool.Pool) *notifyRepoImpl {
 }
 
 func (r *notifyRepoImpl) Create(ctx context.Context, n d.NotificationCreateRequest) (d.Notification, error) {
+	if n.IdempotencyKey != "" {
+		if existing, ok, err := r.getByIdempotency(ctx, n.UserID, n.IdempotencyKey); err != nil {
+			return d.Notification{}, err
+		} else if ok {
+			return existing, nil
+		}
+	}
+
 	const q = `
-		INSERT INTO notifications (user_id, task_id, type, title, body)
-		VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO notifications (user_id, task_id, type, title, body, idempotency_key)
+		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id, user_id, task_id, type, title, body, is_read, created_at, expires_at
 	`
 	var notification d.Notification
@@ -30,7 +39,7 @@ func (r *notifyRepoImpl) Create(ctx context.Context, n d.NotificationCreateReque
 		ctx,
 		q,
 		n.UserID,
-		n.TaskID, n.Type, n.Title, n.Body).Scan(
+		n.TaskID, n.Type, n.Title, n.Body, n.IdempotencyKey).Scan(
 		&notification.ID,
 		&notification.UserID,
 		&notification.TaskID,
@@ -42,6 +51,11 @@ func (r *notifyRepoImpl) Create(ctx context.Context, n d.NotificationCreateReque
 		&notification.ExpiresAt,
 	)
 	if err != nil {
+		if n.IdempotencyKey != "" && isUniqueViolation(err) {
+			if existing, ok, err := r.getByIdempotency(ctx, n.UserID, n.IdempotencyKey); err == nil && ok {
+				return existing, nil
+			}
+		}
 		return d.Notification{}, fmt.Errorf("create notification: %w", err)
 	}
 	return notification, nil
@@ -175,4 +189,40 @@ func (r *notifyRepoImpl) List(ctx context.Context, req d.NotificationListRequest
 		Notifications: out,
 		NextPageToken: next,
 	}, nil
+}
+
+func (r *notifyRepoImpl) getByIdempotency(ctx context.Context, userID d.UserID, key string) (d.Notification, bool, error) {
+	const q = `
+		SELECT id, user_id, task_id, type, title, body, is_read, created_at, expires_at
+		FROM notifications
+		WHERE user_id = $1 AND idempotency_key = $2
+	`
+
+	var n d.Notification
+	err := r.db.QueryRow(ctx, q, userID, key).Scan(
+		&n.ID,
+		&n.UserID,
+		&n.TaskID,
+		&n.Type,
+		&n.Title,
+		&n.Body,
+		&n.Read,
+		&n.CreatedAt,
+		&n.ExpiresAt,
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return d.Notification{}, false, nil
+		}
+		return d.Notification{}, false, fmt.Errorf("get by idempotency: %w", err)
+	}
+	return n, true, nil
+}
+
+func isUniqueViolation(err error) bool {
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		return pgErr.Code == "23505"
+	}
+	return false
 }

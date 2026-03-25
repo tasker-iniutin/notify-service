@@ -131,7 +131,6 @@ GOCACHE=/tmp/go-build go test ./...
 ## Current Limitations
 
 - no push delivery (email/websocket);
-- no idempotency enforcement for `CreateNotification`;
 - no structured audit logging.
 
 ## Summary
