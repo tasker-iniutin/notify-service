@@ -28,11 +28,12 @@ type Notification struct {
 }
 
 type NotificationCreateRequest struct {
-	UserID UserID
-	TaskID TaskID
-	Type   NotificationType
-	Title  string
-	Body   string
+	UserID          UserID
+	TaskID          TaskID
+	Type            NotificationType
+	Title           string
+	Body            string
+	IdempotencyKey  string
 }
 
 type NotificationUpdateRequest struct {

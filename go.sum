@@ -32,8 +32,8 @@ github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
 github.com/tasker-iniutin/api-contracts v0.1.1-alpha h1:ruMZb1+V4zJ0iwewWcTi75hO2wekjPYa8KUFLAX/OiE=
 github.com/tasker-iniutin/api-contracts v0.1.1-alpha/go.mod h1:1SRw4y7c/EoWMHJ/7RdY7k27GqxR0E4zCUgZkn/tiRM=
-github.com/tasker-iniutin/common v0.2.0 h1:lOdFtGLS+Im1sqzb+o7km58UT/MEv0C4uic7FFFtbTw=
-github.com/tasker-iniutin/common v0.2.0/go.mod h1:jM4fhrIlwZO8g2WG3cV/qr2IIllcm6Wq5rg/5njVfWU=
+github.com/tasker-iniutin/common v0.3.0 h1:1EkRXwsZg0/e4pyVdjyCfPTDnUXaoLvj5FQn4O2k42w=
+github.com/tasker-iniutin/common v0.3.0/go.mod h1:jM4fhrIlwZO8g2WG3cV/qr2IIllcm6Wq5rg/5njVfWU=
 go.opentelemetry.io/auto/sdk v1.2.1 h1:jXsnJ4Lmnqd11kwkBV2LgLoFMZKizbCi5fNZ/ipaZ64=
 go.opentelemetry.io/auto/sdk v1.2.1/go.mod h1:KRTj+aOaElaLi+wW1kO/DZRXwkF4C5xPbEe3ZiIhN7Y=
 go.opentelemetry.io/otel v1.39.0 h1:8yPrr/S0ND9QEfTfdP9V+SiwT4E0G7Y5MO7p85nis48=
